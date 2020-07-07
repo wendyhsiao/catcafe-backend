@@ -23,6 +23,7 @@ module.exports = {
   },
 
   down: async (queryInterface, Sequelize) => {
-    await queryInterface.bulkDelete('Cafes', null, {})
+    const option = { truncate: true, restartIdentity: true }
+    await queryInterface.bulkDelete('Cafes', null, option)
   }
 }
