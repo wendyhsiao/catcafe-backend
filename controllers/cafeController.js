@@ -40,6 +40,15 @@ const cafeController = {
     } catch (error) {
       console.error(error)
     }
+  },
+  getCafe: async (req, res) => {
+    try {
+      const cafe = await Cafe.findByPk(req.params.id, { include: [Image] })
+
+      return res.json({ cafe })
+    } catch (error) {
+      console.error(error)
+    }
   }
 }
 
