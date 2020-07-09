@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs')
 const db = require('../../models')
 const { AdminUser } = db
+const passport = require('../../config/passport')
 
 const userController = {
   signUp: async (req, res) => {
@@ -32,6 +33,20 @@ const userController = {
       })
 
       return res.json({ status: 'success', message: '成功註冊帳號！' })
+    } catch (error) {
+      console.error(error)
+    }
+  },
+  signIn: (req, res, next) => {
+    try {
+      passport.authenticate('local', (err, user, info) => {
+        if (err) { return next(err) }
+        if (!user) { return res.json({ status: 'error', message: '帳號或密碼錯誤' }) }
+        req.logIn(user, (err) => {
+          if (err) { return next(err) }
+          return res.json({ status: 'success', message: `${user.email} 成功登入帳號！` })
+        })
+      })(req, res, next)
     } catch (error) {
       console.error(error)
     }
