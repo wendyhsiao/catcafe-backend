@@ -1,5 +1,5 @@
 const db = require('../../models')
-const { Cafe } = db
+const { Cafe, Image } = db
 const { Op } = require('sequelize')
 
 const adminController = {
@@ -33,6 +33,14 @@ const adminController = {
       })
 
       return res.json({ cafes })
+    } catch (error) {
+      console.error(error)
+    }
+  },
+  getCafe: async (req, res) => {
+    try {
+      const cafe = await Cafe.findByPk(req.params.id, { include: [Image] })
+      res.json({ cafe })
     } catch (error) {
       console.error(error)
     }
