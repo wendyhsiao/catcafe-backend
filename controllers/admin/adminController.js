@@ -2,6 +2,10 @@ const db = require('../../models')
 const { Cafe, Image } = db
 const { Op } = require('sequelize')
 
+const imgur = require('imgur-node-api')
+const IMGUR_CLIENT_ID = process.env.IMGUR_CLIENT_ID
+imgur.setClientID(IMGUR_CLIENT_ID)
+
 const adminController = {
   getCafes: async (req, res) => {
     try {
@@ -41,6 +45,52 @@ const adminController = {
     try {
       const cafe = await Cafe.findByPk(req.params.id, { include: [Image] })
       res.json({ cafe })
+    } catch (error) {
+      console.error(error)
+    }
+  },
+  postCafe: async (req, res) => {
+    try {
+      const {
+        name, addressCity, addressDist, addressOther, openingHour,
+        tel, consumptionPatterns, rule, other, minimumCharge, facebook, instagram
+      } = req.body
+      const { files } = req
+      // 確認必填資訊
+      if (!name || !addressCity || !addressDist || !addressOther || !openingHour) {
+        return res.json({ stats: 'error', message: 'name, addressCity, addressDist, addressOther, openingHour 為必填項目' })
+      }
+      // 確認最少一張照片
+      if (files.length === 0) {
+        return res.json({ stats: 'error', message: '只少需要一張照片' })
+      }
+
+      // 新增 cafe
+      const newCafe = await Cafe.create({
+        name,
+        address_city: addressCity,
+        address_dist: addressDist,
+        address_other: addressOther,
+        opening_hour: openingHour,
+        tel,
+        consumption_patterns: consumptionPatterns,
+        rule,
+        other,
+        minimum_charge: minimumCharge,
+        facebook,
+        instagram
+      })
+      // 新增 cafe 照片
+      files.map(file => {
+        imgur.upload(file.path, async (_err, result) => {
+          await Image.create({
+            url: result.data.link,
+            CafeId: newCafe.id
+          })
+        })
+      })
+
+      res.json({ status: 'success', message: '成功新增 cafe！' })
     } catch (error) {
       console.error(error)
     }
