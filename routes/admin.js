@@ -9,6 +9,7 @@ router.get('/cafes', adminController.getCafes)
 router.get('/cafes/:id/edit', adminController.getCafe)
 router.post('/cafes', upload.array('image', 12), adminController.postCafe)
 router.put('/cafes/:id', upload.array('image', 12), adminController.putCafe)
+router.delete('/cafes/:id', adminController.deleteCafe)
 
 router.post('/signup', userController.signUp)
 router.post('/signin', userController.signIn)

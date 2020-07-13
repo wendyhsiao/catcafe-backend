@@ -10,7 +10,7 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate (models) {
-      Cafe.hasMany(models.Image)
+      Cafe.hasMany(models.Image, { onDelete: 'CASCADE', hooks: true })
     }
   };
   Cafe.init({

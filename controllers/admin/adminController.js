@@ -174,6 +174,16 @@ const adminController = {
     } catch (error) {
       console.error(error)
     }
+  },
+  deleteCafe: async (req, res) => {
+    try {
+      const cafe = await Cafe.findByPk(req.params.id)
+      cafe.destroy()
+
+      res.json({ status: 'success', message: '成功刪除 cafe！' })
+    } catch (error) {
+      console.error(error)
+    }
   }
 }
 
