@@ -87,6 +87,13 @@ const adminController = {
             url: result.data.link,
             CafeId: newCafe.id
           })
+
+          await ImgurImage.create({
+            url: result.data.link,
+            deletehash: result.data.deletehash,
+            deleteUrl: `imgur.com/delete/${result.data.deletehash}`,
+            CafeId: newCafe.id
+          })
         })
       })
 
@@ -155,9 +162,9 @@ const adminController = {
 
             await ImgurImage.create({
               url: result.data.link,
-              CafeId: cafe.id,
               deletehash: result.data.deletehash,
-              deleteUrl: `imgur.com/delete/${result.data.deletehash}`
+              deleteUrl: `imgur.com/delete/${result.data.deletehash}`,
+              CafeId: cafe.id
             })
           })
         }
