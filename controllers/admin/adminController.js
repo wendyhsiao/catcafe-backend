@@ -1,5 +1,5 @@
 const db = require('../../models')
-const { Cafe, Image } = db
+const { Cafe, Image, ImgurImage } = db
 const { Op } = require('sequelize')
 
 const imgur = require('imgur-node-api')
@@ -91,6 +91,79 @@ const adminController = {
       })
 
       res.json({ status: 'success', message: '成功新增 cafe！' })
+    } catch (error) {
+      console.error(error)
+    }
+  },
+  putCafe: async (req, res) => {
+    try {
+      const {
+        name, addressCity, addressDist, addressOther, openingHour,
+        tel, consumptionPatterns, rule, other, minimumCharge, facebook, instagram
+      } = req.body
+      const { files } = req
+      // 確認必填資訊
+      if (!name || !addressCity || !addressDist || !addressOther || !openingHour) {
+        return res.json({ stats: 'error', message: 'name, addressCity, addressDist, addressOther, openingHour 為必填項目' })
+      }
+
+      const cafe = await Cafe.findByPk(req.params.id, { include: [Image] })
+      await cafe.update({
+        name,
+        address_city: addressCity,
+        address_dist: addressDist,
+        address_other: addressOther,
+        opening_hour: openingHour,
+        tel,
+        consumption_patterns: consumptionPatterns,
+        rule,
+        other,
+        minimum_charge: minimumCharge,
+        facebook,
+        instagram
+      })
+
+      const imgs = await Image.findAll({ where: { cafeId: cafe.id } })
+      const newImagesId = req.body.imageId
+      // 預期刪除的照片
+      const deleteImages = []
+      for (const img of imgs) {
+        if (!newImagesId.includes(img.dataValues.id)) {
+          deleteImages.push(img)
+        }
+      }
+
+      // 確認修改後照片總數維持在 1-20 之間
+      // imgCount = 現有照片數 - 預期刪除的照片數 + 預期新增的照片數
+      const imgCount = imgs.length - deleteImages.length + files.length
+      if (imgCount > 20 || imgCount < 1) {
+        return res.json({ status: 'error', message: '照片總數最少為 1 張，最多為 20 張' })
+      }
+      // 刪除 cafe 照片
+      for (const img of deleteImages) {
+        console.log('img delete', img)
+        img.destroy()
+      }
+      // 新增 cafe 照片
+      if (files) {
+        for (const file of files) {
+          imgur.upload(file.path, async (_err, result) => {
+            await Image.create({
+              url: result.data.link,
+              CafeId: cafe.id
+            })
+
+            await ImgurImage.create({
+              url: result.data.link,
+              CafeId: cafe.id,
+              deletehash: result.data.deletehash,
+              deleteUrl: `imgur.com/delete/${result.data.deletehash}`
+            })
+          })
+        }
+      }
+
+      res.json({ status: 'success', message: '成功修改 cafe！' })
     } catch (error) {
       console.error(error)
     }
