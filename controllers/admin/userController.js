@@ -1,4 +1,5 @@
 const bcrypt = require('bcryptjs')
+const jwt = require('jsonwebtoken')
 const db = require('../../models')
 const { AdminUser } = db
 const passport = require('../../config/passport')
@@ -37,16 +38,34 @@ const userController = {
       console.error(error)
     }
   },
-  signIn: (req, res, next) => {
+  signIn: async (req, res) => {
     try {
-      passport.authenticate('local', (err, user, info) => {
-        if (err) { return next(err) }
-        if (!user) { return res.json({ status: 'error', message: '帳號或密碼錯誤' }) }
-        req.logIn(user, (err) => {
-          if (err) { return next(err) }
-          return res.json({ status: 'success', message: `${user.email} 成功登入帳號！` })
-        })
-      })(req, res, next)
+      // 確認帳號密碼都有填
+      if (!req.body.email || !req.body.password) {
+        return res.json({ status: 'error', message: '請輸入帳號及密碼' })
+      }
+      // 確認帳號是否存在
+      const user = await AdminUser.findOne({ where: { email: req.body.email }})
+      if (!user) {
+        return res.status(401).json({ status: 'error', message: '找不到此帳號' })
+      }
+      // 確認密碼是否正確
+      if (!bcrypt.compareSync(req.body.password, user.password)) {
+        return res.status(401).json({ status: 'error', message: '密碼錯誤' })
+      }
+
+      // 簽發 token
+      const payload = { id: user.id }
+      const token = jwt.sign(payload, process.env.JWT_SECRET)
+
+      return res.json({
+        status: 'success',
+        message: 'ok',
+        token: token,
+        user: {
+          id: user.id, name: user.name, email: user.email
+        }
+      })
     } catch (error) {
       console.error(error)
     }
