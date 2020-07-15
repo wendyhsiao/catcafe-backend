@@ -3,6 +3,7 @@ const LocalStrategy = require('passport-local')
 const bcrypt = require('bcryptjs')
 const db = require('../models')
 const { AdminUser } = db
+require('dotenv').config()
 
 passport.use(new LocalStrategy(
   {
@@ -31,5 +32,25 @@ passport.deserializeUser((id, done) => {
     done(err, user)
   })
 })
+
+// JWT
+const passportJWT = require('passport-jwt')
+const ExtractJwt = passportJWT.ExtractJwt
+const JwtStrategy = passportJWT.Strategy
+
+var opts = {}
+opts.jwtFromRequest = ExtractJwt.fromAuthHeaderAsBearerToken()
+opts.secretOrKey = process.env.JWT_SECRET
+
+passport.use(new JwtStrategy(opts, async (jwt_payload, done) => {
+  try {
+    const user = await AdminUser.findByPk(jwt_payload.id)
+    if (!user) { return done(null, false) }
+    return done(null, user)
+  } catch (error) {
+    console.error(error)
+    return done(error, false)
+  }
+}))
 
 module.exports = passport
