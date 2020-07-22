@@ -15,7 +15,7 @@ const adminController = {
         offset = (req.query.page - 1) * pageLimit
       }
 
-      const searchQuery = req.query.q
+      const searchQuery = req.query.search
       let where = {}
       if (searchQuery !== undefined) {
         where = {
