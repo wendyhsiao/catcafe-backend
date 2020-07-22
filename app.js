@@ -4,6 +4,9 @@ const passport = require('./config/passport.js')
 const db = require('./models') // 引入資料庫
 const app = express()
 const port = 3000
+const cors = require('cors')
+
+app.use(cors())
 
 app.use(bodyParser.urlencoded({ extended: true }))
 app.use(bodyParser.json())
