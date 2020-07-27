@@ -11,8 +11,9 @@ const adminController = {
     try {
       const pageLimit = 15 // 每頁 15 筆
       let offset = 0 // 偏移數
-      if (req.query.page) {
-        offset = (req.query.page - 1) * pageLimit
+      const page = Number(req.query.page) || 1
+      if (page !== 1) {
+        offset = (page - 1) * pageLimit
       }
 
       const searchQuery = req.query.search
@@ -35,8 +36,19 @@ const adminController = {
         offset,
         where
       })
+      const pages = Math.ceil(cafes.count / pageLimit) || 1 // 總頁
+      const totalPages = Array.from({ length: pages }).map((item, index) => index + 1)
+      const previousPage = page - 1 < 1 ? 1 : page - 1
+      const nextPage = page + 1 > pages ? pages : page + 1
 
-      return res.json({ cafes })
+      const pagination = {
+        page,
+        pages,
+        totalPages,
+        previousPage,
+        nextPage
+      }
+      return res.json({ cafes, pagination })
     } catch (error) {
       console.error(error)
     }
