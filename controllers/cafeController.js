@@ -5,7 +5,7 @@ const { Cafe, Image } = db
 const cafeController = {
   getCafes: async (req, res) => {
     try {
-      const searchQuery = req.query.q
+      const searchQuery = req.query.search
       let where = {}
       if (searchQuery !== undefined) {
         where = {
