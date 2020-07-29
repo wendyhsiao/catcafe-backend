@@ -143,11 +143,15 @@ const adminController = {
       })
 
       const imgs = await Image.findAll({ where: { cafeId: cafe.id } })
-      const newImagesId = req.body.imageId
+      let imageId = req.body.imageId || []
+      // 修改後，剩餘的照片 id
+      // 如 imageId 只有一個會是 String，需轉為 Array
+      if (!Array.isArray(imageId)) { imageId = [imageId] }
+      const modifiedImagesId = imageId.map(id => id++)
       // 預期刪除的照片
       const deleteImages = []
       for (const img of imgs) {
-        if (!newImagesId.includes(img.dataValues.id)) {
+        if (!modifiedImagesId.includes(img.dataValues.id)) {
           deleteImages.push(img)
         }
       }
