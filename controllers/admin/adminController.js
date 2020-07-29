@@ -56,6 +56,13 @@ const adminController = {
   getCafe: async (req, res) => {
     try {
       const cafe = await Cafe.findByPk(req.params.id, { include: [Image] })
+      // 設定 textarea 換行
+      const { consumption_patterns, rule, other } = cafe.dataValues
+      const reg = new RegExp('<br>', 'g')
+      cafe.dataValues.consumption_patterns = consumption_patterns.replace(reg, '\n')
+      cafe.dataValues.rule = rule.replace(reg, '\n')
+      cafe.dataValues.other = other.replace(reg, '\n')
+
       res.json({ cafe })
     } catch (error) {
       console.error(error)
@@ -125,6 +132,10 @@ const adminController = {
       if (!name || !addressCity || !addressDist || !addressOther || !openingHour) {
         return res.json({ stats: 'error', message: 'name, addressCity, addressDist, addressOther, openingHour 為必填項目' })
       }
+      // 設定 textarea 換行
+      const consumptionPatterns2 = consumptionPatterns.replace(/\n|\r\n/g, '<br>')
+      const rule2 = rule.replace(/\n|\r\n/g, '<br>')
+      const other2 = other.replace(/\n|\r\n/g, '<br>')
 
       const cafe = await Cafe.findByPk(req.params.id, { include: [Image] })
       await cafe.update({
@@ -134,9 +145,9 @@ const adminController = {
         address_other: addressOther,
         opening_hour: openingHour,
         tel,
-        consumption_patterns: consumptionPatterns,
-        rule,
-        other,
+        consumption_patterns: consumptionPatterns2,
+        rule: rule2,
+        other: other2,
         minimum_charge: minimumCharge,
         facebook,
         instagram
