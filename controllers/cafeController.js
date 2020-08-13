@@ -7,7 +7,7 @@ const cafeController = {
     try {
       const searchQuery = req.query.search
       let where = {}
-      if (searchQuery !== undefined) {
+      if (searchQuery !== 'undefined') {
         where = {
           [Op.or]: [ // 搜尋時查找縣市、區、店名
             {
@@ -29,10 +29,19 @@ const cafeController = {
         }
       }
 
-      const cafes = await Cafe.findAll({
-        raw: false,
-        nest: true,
+      const pageLimit = 15 // 每頁 15 筆
+      let offset = 0 // 偏移數
+      const page = Number(req.query.page) || 1
+      if (page !== 1) {
+        offset = (page - 1) * pageLimit
+      }
+
+      const cafes = await Cafe.findAndCountAll({
+        order: [['id', 'DESC']], // 預設排序新至舊
+        limit: pageLimit,
+        offset,
         include: [Image],
+        distinct: true, // include 去重
         where
       })
 
