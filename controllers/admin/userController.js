@@ -69,6 +69,13 @@ const userController = {
     } catch (error) {
       console.error(error)
     }
+  },
+  getCurrentUser: async (req, res) => {
+    return res.json({
+      id: req.user.id,
+      name: req.user.name,
+      email: req.user.email
+    })
   }
 }
 
