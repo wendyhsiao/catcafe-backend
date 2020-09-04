@@ -13,6 +13,7 @@ router.get('/cafes/:id/edit', authenticated, adminController.getCafe)
 router.post('/cafes', authenticated, upload.array('image', 12), adminController.postCafe)
 router.put('/cafes/:id', authenticated, upload.array('image', 12), adminController.putCafe)
 router.delete('/cafes/:id', authenticated, adminController.deleteCafe)
+router.get('/get_current_user', authenticated, userController.getCurrentUser)
 
 router.post('/signup', userController.signUp)
 router.post('/signin', userController.signIn)

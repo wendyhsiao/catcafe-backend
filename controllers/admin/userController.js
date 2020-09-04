@@ -17,7 +17,7 @@ const userController = {
         return res.json({ status: 'error', message: '兩次密碼輸入不同！' })
       }
       // 確認 email 格式
-      const regexp = / ^ ([\w\.\-]){1,64} \@ ([\w\.\-]){1,64} $ /
+      const regexp = /^([\w\.\-]){1,64}\@([\w\.\-]){1,64}$/
       if (!email.match(regexp)) {
         return res.json({ status: 'error', message: '此 email 格式無效！' })
       }
@@ -69,6 +69,13 @@ const userController = {
     } catch (error) {
       console.error(error)
     }
+  },
+  getCurrentUser: async (req, res) => {
+    return res.json({
+      id: req.user.id,
+      name: req.user.name,
+      email: req.user.email
+    })
   }
 }
 
